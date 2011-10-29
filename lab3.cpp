@@ -37,8 +37,12 @@ using namespace std;
 #include <math.h>
 #include <GL/glut.h>
 
-void RGBtoHSV();
-void HSVtoRGB();
+void RGBtoHSV(void);
+void HSVtoRGB(void);
+void consoleMenu(void);
+void drawOrtho(void);
+void keyboardCallback(unsigned char key, int x, int y);
+void initDraw(void);
 
 // red, green, blue components (0.0 to 1.0)
 float rgb[3] = { 0.f, 0.f, 0.f };
@@ -46,11 +50,55 @@ float rgb[3] = { 0.f, 0.f, 0.f };
 // hue, saturation, value components (0.0 to 1.0)
 float hsv[3] = { 0.f, 0.f, 0.f };
 
-void main( int argc, char *argv[] )
-{
+// RGB to HSV keyboard action list
+char RGBActionList[7] = "RrGgBb";
 
+// HSV to RGB keyboard action list
+char HSVActionList[7] = "HhSsVv";
+
+// GLUT window id
+int ortho;
+
+int main( int argc, char *argv[] )
+{
+	// Show console menu
+	consoleMenu();
+
+  // Initialize window system
+  glutInit( &argc, argv );
+  glutInitDisplayMode( GLUT_SINGLE | GLUT_RGB );
+  glutInitWindowSize( 640, 480 );
+  glutCreateWindow( "Lab 2" );
+
+  // Initialize graphics
+  initDraw();
+
+  // Callbacks
+  glutDisplayFunc( drawOrtho );
+	glutKeyboardFunc( keyboardCallback );
+
+	// Event loop
+  glutMainLoop();
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	return 0;
 }
 
+// Orthographic draw
+void drawOrtho(void)
+{
+  glClearColor(0.5, 0.5, 0.5, 1);
+  glClear( GL_COLOR_BUFFER_BIT );
+
+  glColor3f(rgb[0], rgb[1], rgb[2]);
+	glBegin(GL_POLYGON);
+	glVertex2i( -5, -5);
+	glVertex2i( -5, 5);
+	glVertex2i( 5, 5);
+	glVertex2i( 5, -5);
+	glEnd();
+	glFlush();
+}
 
 // RGB to HSV color space conversion (uses global rgb and hsv arrays)
 void RGBtoHSV()
@@ -147,3 +195,101 @@ void HSVtoRGB()
   rgb[2] = b;
 }
 
+void consoleMenu(void)
+{
+	cout << "- 'R' key: increases red component of RGB color model" << endl;
+	cout << "- 'r' key: decreases red component of RGB color model" << endl;
+	cout << "- 'G' key: increases green component of RGB color model" << endl;
+	cout << "- 'g' key: decreases green component of RGB color model" << endl;
+	cout << "- 'B' key: increases blue component of RGB color model" << endl;
+	cout << "- 'b' key: decreases blue component of RGB color model" << endl;
+	cout << "- 'H' key: increases hue component of HSV color model" << endl;
+	cout << "- 'h' key: decreases hue component of HSV color model" << endl;
+	cout << "- 'S' key: increases saturation component of HSV color model" << endl;
+	cout << "- 's' key: decreases saturation component of HSV color model" << endl;
+	cout << "- 'V' key: increases value component of HSV color model" << endl;
+	cout << "- 'v' key: decreases value component of HSV color model" << endl;
+	cout << "- 'q' key: quit" << endl;
+	return;
+}
+
+void keyboardCallback(unsigned char key, int x, int y)
+{
+	int i;
+	switch(key)
+	{
+		case 'R':
+			rgb[0] += 0.1;
+		break;
+		case 'r':
+			rgb[0] -= 0.1;
+		break;
+		case 'G':
+			rgb[1] += 0.1;
+		break;
+		case 'g':
+			rgb[1] -= 0.1;
+		break;
+		case 'B':
+			rgb[2] += 0.1;
+		break;
+		case 'b':
+			rgb[2] -= 0.1;
+		break;
+		case 'H':
+			hsv[0] += 0.1;
+		break;
+		case 'h':
+			hsv[0] -= 0.1;
+		break;
+		case 'S':
+			hsv[1] += 0.1;
+		break;
+		case 's':
+			hsv[1] -= 0.1;
+		break;
+		case 'V':
+			hsv[2] += 0.1;
+		break;
+		case 'v':
+			hsv[2] -= 0.1;
+		break;
+	}
+	for(i = 0; i < 3; i++)
+	{
+		if(rgb[i] < 0.0) rgb[i] = 0.0;
+		if(rgb[i] > 1.0) rgb[i] = 1.0;
+		if(hsv[i] < 0.0) hsv[i] = 0.0;
+		if(hsv[i] > 1.0) hsv[i] = 1.0;
+	}
+	for(i = 0; i < 6; i++)
+	{
+		if(key == RGBActionList[i])
+		{
+			RGBtoHSV();
+			break;
+		}
+	}
+	for(i = 0; i < 6; i++)
+	{
+		if(key == HSVActionList[i])
+		{
+			HSVtoRGB();
+			break;
+		}
+	}
+	glutPostRedisplay();
+	return;
+}
+
+// Initialize drawing
+void initDraw(void)
+{
+  // Background color
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+
+  // 2D world projection
+  glMatrixMode( GL_PROJECTION );
+  glLoadIdentity();
+  gluOrtho2D( -10.0, 10.0, -10.0, 10.0 );
+}
