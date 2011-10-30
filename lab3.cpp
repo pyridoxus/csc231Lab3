@@ -35,6 +35,7 @@ Instructions
 #include <iostream>
 using namespace std;
 #include <math.h>
+#include <stdlib.h>
 #include <GL/glut.h>
 
 void RGBtoHSV(void);
@@ -55,9 +56,6 @@ char RGBActionList[7] = "RrGgBb";
 
 // HSV to RGB keyboard action list
 char HSVActionList[7] = "HhSsVv";
-
-// GLUT window id
-int ortho;
 
 int main( int argc, char *argv[] )
 {
@@ -254,6 +252,8 @@ void keyboardCallback(unsigned char key, int x, int y)
 		case 'v':
 			hsv[2] -= 0.1;
 		break;
+		case 'q':
+			exit(0);
 	}
 	for(i = 0; i < 3; i++)
 	{
